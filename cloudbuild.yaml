@@ -1,12 +1,12 @@
 steps:
-  - id: 'Get PAT from Secret Manager'
+  - id: 'Get _PAT from Secret Manager'
     name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        PAT=$(gcloud secrets versions access latest --secret=github-pat --project=${_PROJECT_ID})
-        echo "PAT=$PAT" >> /workspace/env_vars.txt
+        _PAT=$(gcloud secrets versions access latest --secret=github-_PAT --project=${_PROJECT_ID})
+        echo "_PAT=$_PAT" >> /workspace/env_vars.txt
 
   - id: 'Update version in file'
     name: 'ubuntu'
@@ -27,7 +27,7 @@ steps:
         source /workspace/env_vars.txt
         git config --global user.email "anushkasaxenaa@google.com"
         git config --global user.name "Cloud Build Bot Anushka"
-        git config --global url."https://${PAT}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+        git config --global url."https://${_PAT}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
         gh auth refresh -s project
         
         BRANCH_NAME="auto-update/toolbox-version-${_TOOLBOX_VERSION}"
