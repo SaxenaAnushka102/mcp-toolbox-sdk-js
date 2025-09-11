@@ -1,12 +1,22 @@
 steps:
-  - id: 'Update version in files'
+  - id: 'Get PAT from Secret Manager'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        PAT=$(gcloud secrets versions access latest --secret=github-pat --project=${_PROJECT_ID})
+        echo "PAT=$PAT" >> /workspace/env_vars.txt
+
+  - id: 'Update version in file'
     name: 'ubuntu'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        _NEW_VERSION=${_TOOLBOX_VERSION}
-        sed -i "s/_TOOLBOX_VERSION: '.*/_TOOLBOX_VERSION: '$_NEW_VERSION'/" packages/toolbox-core/integration.cloudbuild.yaml
+        source /workspace/env_vars.txt
+        NEW_VERSION=${_TOOLBOX_VERSION}
+        sed -i "s/_TOOLBOX_VERSION: '.*/_TOOLBOX_VERSION: '$NEW_VERSION'/" packages/toolbox-core/integration.cloudbuild.yaml
 
   - id: 'Create Pull Request'
     name: 'gcr.io/cloud-builders/gcloud'
@@ -14,13 +24,10 @@ steps:
     args:
       - '-c'
       - |
-        # Use the PAT from the dispatcher build
+        source /workspace/env_vars.txt
         git config --global user.email "anushkasaxenaa@google.com"
         git config --global user.name "Cloud Build Bot Anushka"
-        git config --global url."https://${_PAT}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
-        
-        # Install the GitHub CLI
-        apt-get update && apt-get install -y gh
+        git config --global url."https://${PAT}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
         
         BRANCH_NAME="auto-update/toolbox-version-${_TOOLBOX_VERSION}"
         git checkout -b "$BRANCH_NAME"
