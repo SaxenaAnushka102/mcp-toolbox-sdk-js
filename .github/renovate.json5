@@ -1,26 +1,29 @@
 {
-  extends: [
-    'config:recommended',
-    ':semanticCommits',
-    ':ignoreUnstable',
-    'group:allNonMajor',
-    ':separateMajorReleases',
-    ':prConcurrentLimitNone',
-    ':prHourlyLimitNone',
-    ':preserveSemverRanges',
+  "extends": [
+    "config:recommended",
+    ":semanticCommitTypeAll(chore)",
+    ":ignoreUnstable",
+    "group:allNonMajor",
+    ":separateMajorReleases",
+    ":prConcurrentLimitNone",
+    ":prHourlyLimitNone",
+    ":preserveSemverRanges"
   ],
-  minimumReleaseAge: '3',
-  rebaseWhen: 'conflicted',
-  dependencyDashboardLabels: [
-    'type: process',
+  "ignorePaths": [
+    ".kokoro/**"
   ],
-  packageRules: [
+  "minimumReleaseAge": "3",
+  "rebaseWhen": "conflicted",
+  "dependencyDashboardLabels": [
+    "type: process"
+  ],
+  "packageRules": [
     {
-      groupName: 'GitHub Actions',
-      matchManagers: [
-        'github-actions',
+      "groupName": "GitHub Actions",
+      "matchManagers": [
+        "github-actions"
       ],
-      pinDigests: true,
+      "pinDigests": true
     },
     {
       "groupName": "js-ts-nonmajor",
@@ -32,13 +35,23 @@
         "minor",
         "patch"
       ]
-    },
-    {
-      groupName: 'kokoro dependencies',
-      matchFileNames: [
-        '.kokoro/**',
-      ],
-    },
+    }
   ],
-  "ignoreDeps": ["typescript"],
+  "ignoreDeps": [
+    "typescript"
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": [
+        "packages/toolbox-core/integration.cloudbuild.yaml"
+      ],
+      "matchStrings": [
+        "_TOOLBOX_VERSION: ['\"]?(?<currentValue>v?\\d+\\.\\d+\\.\\d+)['\"]?"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "googleapis/genai-toolbox",
+      "versioningTemplate": "semver",
+      "packageNameTemplate": "googleapis/genai-toolbox"
+    }
+  ]
 }
